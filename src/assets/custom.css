@@ -82,5 +82,10 @@
   animation-name: slideInLeft;
 }
 ._1dB-m{
-  background: #ccc;
+  /* background: #ccc; */
+}
+
+.trasnt{
+  color: #07bc4c;
+  padding-top: 4px;
 }

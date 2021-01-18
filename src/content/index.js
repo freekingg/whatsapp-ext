@@ -18,9 +18,6 @@ injectCustomJs()
 initCustomPanel2()
 initCustomEventListen()
 
-const ls = document.querySelectorAll('._1wlJG')
-console.log('ls', ls)
-
 // 接收来自后台的消息
 chrome.extension.onMessage.addListener(async function (request, sender, sendMessage) {
   console.log('接收来自后台的消息', request)
@@ -52,6 +49,11 @@ function initCustomPanel2() {
   document.body.appendChild(panel)
 }
 
+setTimeout(() => {
+  let session = document.querySelector('._3soxC')
+console.log(session);
+}, 5000);
+
 function initCustomEventListen() {
   var hiddenDiv = document.getElementById('myCustomEventDiv')
   if (!hiddenDiv) {
@@ -67,7 +69,33 @@ function initCustomEventListen() {
     tip(eventData)
 
     const ls = document.querySelectorAll('._1wlJG')
-    console.log('ls', ls)
+
+    // 选择需要观察变动的节点
+    const targetNode = document.querySelector('.tSmQ1')
+    console.log('开始监听')
+    // 观察器的配置（需要观察什么变动）
+    const config = { attributes: false, childList: true, subtree: false }
+
+    // 当观察到变动时执行的回调函数
+    const callback = function (mutationsList, observer) {
+      // Use traditional 'for loops' for IE 11
+          let last = mutationsList[0]
+          let target = last.addedNodes[0].querySelector('.selectable-text')
+          let targetText = target.innerText
+
+         let d =  document.createElement('div')
+          d.innerHTML=`<h2 class="trasnt">这是翻译的内容</h2>`
+          target.appendChild(d)
+    }
+
+    // 创建一个观察器实例并传入回调函数
+    const observer = new MutationObserver(callback)
+
+    // 以上述配置开始观察目标节点
+    observer.observe(targetNode, config)
+
+    // 之后，可停止观察
+    // observer.disconnect();
   })
 }
 
