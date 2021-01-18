@@ -1,0 +1,42 @@
+{
+    "name": "whatsapp-ext",
+    "version": "0.0.1",
+    "manifest_version": 2,
+    "description": "whatsapp功能扩展",
+    "icons": { 
+      "16": "image/icon/16@2x.png",
+      "48": "image/icon/48@2x.png",
+      "128": "image/icon/128@2x.png"
+    },
+    "options_page": "options.html",
+    "browser_action": {
+        "default_icon": "image/icon/browser_action@2x.png",
+        "default_title": "whatsapp功能扩展",
+        "default_popup": "popup.html"
+    },
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; style-src 'self';",
+    "content_scripts": [{
+        "matches": "<all_urls>",
+        "js": [
+            "js/content.js"
+        ],
+        "css": [
+            "css/content.css"
+        ],
+        "run_at": "document_end"
+    }],
+    "background": {
+        "scripts": [
+            "hot-reload.js",
+            "js/background.js"
+        ]
+    },
+    "permissions": [
+      "tabs",
+      "activeTab",
+      "contextMenus",
+      "webRequest",
+      "http://*/*",
+      "https://*/*"
+    ]
+}
