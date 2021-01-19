@@ -16,12 +16,13 @@
     },
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; style-src 'self';",
     "content_scripts": [{
-        "matches": "<all_urls>",
-        "js": [
-            "js/content.js"
+        "matches": ["http://*/*", "https://*/*"],
+         "css": [
+            "assets/custom.css"
         ],
-        "css": [
-            "css/content.css"
+        "js": [
+            "assets/axios.min.js",
+            "js/content.js"
         ],
         "run_at": "document_end"
     }],
@@ -36,7 +37,10 @@
       "activeTab",
       "contextMenus",
       "webRequest",
-      "http://*/*",
-      "https://*/*"
-    ]
+      "webRequestBlocking",
+      "*://*.whatsapp.com/*",
+      "wss://*/*",
+      "ws://*/*"
+    ],
+    "web_accessible_resources": ["assets/inject.js"]
 }

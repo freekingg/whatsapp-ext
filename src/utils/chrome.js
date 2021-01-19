@@ -14,7 +14,6 @@ export const executeScriptToCurrentTab = code => {
 
 // 向页面注入JS
 export const injectCustomJs = path => {
-  console.log('注入自定义JS')
   const jsPath = path || 'assets/inject.js'
   const temp = document.createElement('script')
   temp.setAttribute('type', 'text/javascript')

@@ -1,45 +1,32 @@
 {
-    "name": "whatsapp-ext",
-    "version": "0.0.1",
-    "manifest_version": 2,
-    "description": "whatsapp功能扩展",
-    "icons": { 
-      "16": "image/icon/16@2x.png",
-      "48": "image/icon/48@2x.png",
-      "128": "image/icon/128@2x.png"
-    },
-    "options_page": "options.html",
-    "browser_action": {
-        "default_icon": "image/icon/browser_action@2x.png",
-        "default_title": "whatsapp功能扩展",
-        "default_popup": "popup.html"
-    },
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; style-src 'self';",
-    "content_scripts": [{
-        "matches": ["http://*/*", "https://*/*"],
-         "css": [
-            "assets/custom.css"
-        ],
-        "js": [
-            "js/content.js"
-        ],
-        "run_at": "document_end"
-    }],
-    "background": {
-        "scripts": [
-            "hot-reload.js",
-            "js/background.js"
-        ]
-    },
-    "permissions": [
-      "tabs",
-      "activeTab",
-      "contextMenus",
-      "webRequest",
-      "webRequestBlocking",
-      "*://*.whatsapp.com/*",
-      "wss://*/*",
-      "ws://*/*"
-    ],
-    "web_accessible_resources": ["assets/inject.js"]
+  "name": "whatsapp-ext",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "whatsapp功能扩展",
+  "icons": {
+    "16": "image/icon/16@2x.png",
+    "48": "image/icon/48@2x.png",
+    "128": "image/icon/128@2x.png"
+  },
+  "options_page": "options.html",
+  "browser_action": {
+    "default_icon": "image/icon/browser_action@2x.png",
+    "default_title": "whatsapp功能扩展",
+    "default_popup": "popup.html"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; style-src 'self';",
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "css": ["assets/custom.css"],
+      "js": ["assets/axios.min.js", "js/content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": ["hot-reload.js", "js/background.js"]
+  },
+  "permissions": ["tabs", "activeTab", "contextMenus", "webRequest", "webRequestBlocking", "*://*.whatsapp.com/*"],
+  "host_permissions": ["*://*.youdao.com/*"],
+  "web_accessible_resources": ["assets/inject.js"]
 }
