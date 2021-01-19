@@ -1,5 +1,5 @@
 <template>
-  <div class="chrome-extension-template-content">ffadsfds</div>
+  <div class="chrome-extension-template-content"></div>
 </template>
 
 <script>

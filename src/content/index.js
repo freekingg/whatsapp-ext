@@ -4,6 +4,7 @@ import App from './App.vue'
 
 // 向页面注入JS
 import { injectCustomJs } from '../utils/chrome'
+import { setStorage, getStorage } from '../utils/help'
 
 const AppConstructor = Vue.extend(App)
 const instance = new AppConstructor()
@@ -12,41 +13,13 @@ document.body.appendChild(instance.$el)
 
 console.log('content.js')
 
+// 当前用户
+let currentUserId = null
+
 // 注入自定义JS
 injectCustomJs()
-// initCustomPanel()
 
-// 接收来自后台的消息
-chrome.extension.onMessage.addListener(async function (request, sender, sendMessage) {
-  console.log('接收来自后台的消息', request)
-  instance.onMessage(request)
-})
-
-function initCustomPanel() {
-  var panel = document.createElement('div')
-  panel.className = 'chrome-plugin-demo-panel'
-  panel.innerHTML = `
-		<h2>演示区</h2>
-		<div class="btn-area">
-			<a href="javascript:sendMessageToContentScriptByPostMessage('你好，我是普通页面！')">通过postMessage发送消息给content-script</a><br>
-			<a href="javascript:sendMessageToContentScriptByEvent('你好啊！我是通过DOM事件发送的消息！')">通过DOM事件发送消息给content-script</a><br>
-			<a href="javascript:invokeContentScript('sendMessageToBackground()')">发送消息到后台或者popup</a><br>
-		</div>
-		<div id="my_custom_log">
-		</div>
-	`
-  document.body.appendChild(panel)
-}
-
-function initCustomPanel2() {
-  var panel = document.createElement('div')
-  panel.className = 'chrome-plugin-demo-panel2'
-  panel.innerHTML = `
-		<h2 onclick="sendMessageToContentScriptByEvent('开始监听')">开启翻译</h2>
-	`
-  document.body.appendChild(panel)
-}
-
+// 监控app根dom加载完成后再进行其它相关事件的监听
 watchAppRoot()
 
 // 观察初始app加载
@@ -59,12 +32,11 @@ function watchAppRoot() {
         if (count === 3) {
           console.log('聊天列表展示')
           setTimeout(() => {
-            // initCustomPanel2()
             // 停止观察
             observer.disconnect()
             // 观察聊天列表
             watchChatWindows()
-          }, 2000)
+          }, 1000)
         }
       }
     }
@@ -79,10 +51,20 @@ function watchChatWindows() {
     let target = null
     if (mutationsList.length) {
       target = mutationsList[mutationsList.length - 1]
-      console.log(target)
+      let current = {}
+      if (target.addedNodes.length) {
+        current = target.addedNodes[0].querySelector('header._1UuMR')
+        // 用户名
+        let userId = current.querySelector('span._1XH7x').innerText.trim()
+        // 上线时间
+        let lastSee = current.querySelector('span._3Id9P') ? current.querySelector('span._3Id9P').innerText.trim() : ''
+        currentUserId = userId
+        setStorage(`${userId}`, { userId, lastSee })
+      }
+
       setTimeout(() => {
         watchChatList()
-      }, 1000)
+      }, 500)
     }
   })
   observer.observe(document.querySelector('.i5ly3._2l_Ww:last-child'), {
@@ -97,20 +79,44 @@ let observerChat = null
 function watchChatList() {
   console.log('开始监控消息列表')
   // 停止观察
-  observerChat && observerChat.disconnect()
+  if (observerChat) {
+    observerChat.disconnect()
+    // observerChat = null
+  }
+
+  // 所有消息的父元素容器
+  let tSmQ1 = document.querySelector('.tSmQ1')
+  console.log('切换了聊天用户', tSmQ1)
+
+  // 获取最近的15条消息
+  let last15 = Array.from(tSmQ1.childNodes).slice(-15)
+  console.log(last15)
+  let chatList = getStorage(`${currentUserId}-chat`)
+  console.log('chatList: ', chatList)
+  for (const it of chatList) {
+    for (const it2 of last15) {
+      if (it2.dataset.id === it.nodeId) {
+        let selectable = it2.querySelector('.selectable-text')
+        let transResult = document.createElement('div')
+        transResult.innerHTML = `<h2 class="trasnt">${it.tgt}</h2>`
+        selectable.appendChild(transResult)
+      }
+    }
+  }
+
   observerChat = new MutationObserver((mutationsList, observer) => {
+    console.log('mutationsList', mutationsList)
     let last = mutationsList[mutationsList.length - 1]
     if (last) {
-      let target = last.target.childNodes[last.target.childNodes.length - 1]
-      let selectable = last.addedNodes[0].querySelector('.selectable-text')
-      let targetText = selectable.innerText
-      console.log('targetText: ', targetText)
+      let addedNodes = last.addedNodes[0]
+      let selectable = addedNodes.querySelector('.selectable-text')
+      let targetText = selectable ? selectable.innerText : ''
 
       // 发送消息向background进行翻译
-      window.postMessage({ cmd: 'invoke', code: sendMessageToBackground(targetText, selectable) }, '*')
+      window.postMessage({ cmd: 'invoke', code: sendMessageToBackground(targetText, selectable, addedNodes) }, '*')
     }
   })
-  observerChat.observe(document.querySelector('.tSmQ1'), {
+  observerChat.observe(tSmQ1, {
     attributes: false,
     childList: true,
     subtree: false,
@@ -118,17 +124,33 @@ function watchChatList() {
 }
 
 // 主动发送消息给后台&接收结果
-function sendMessageToBackground(message, node) {
-  console.log('message', message)
+function sendMessageToBackground(message, node, addedNodes) {
   chrome.runtime.sendMessage({ world: message }, function (response) {
-    console.log('response', response)
     // tip('收到来自后台的回复：' + response)
     let transResult = document.createElement('div')
-
     transResult.innerHTML = `<h2 class="trasnt">${response}</h2>`
     node.appendChild(transResult)
+
+    // 将翻译记录本地存储
+    let chatList = getStorage(`${currentUserId}-chat`)
+    let tempData = {
+      origin: message,
+      tgt: response,
+      nodeId: addedNodes.dataset.id,
+    }
+    if (!chatList) {
+      setStorage(`${currentUserId}-chat`, [tempData])
+      return
+    }
+    setStorage(`${currentUserId}-chat`, [...chatList, tempData])
   })
 }
+
+// 接收来自后台的消息
+chrome.extension.onMessage.addListener(async function (request, sender, sendMessage) {
+  console.log('接收来自后台的消息', request)
+  instance.onMessage(request)
+})
 
 // 简单的消息通知
 let tipCount = 0

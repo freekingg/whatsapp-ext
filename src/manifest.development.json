@@ -19,7 +19,7 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "css": ["assets/custom.css"],
-      "js": ["assets/axios.min.js", "js/content.js"],
+      "js": ["js/content.js"],
       "run_at": "document_end"
     }
   ],
