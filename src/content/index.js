@@ -90,19 +90,23 @@ function watchChatList() {
 
   // 获取最近的15条消息
   let last15 = Array.from(tSmQ1.childNodes).slice(-15)
-  console.log(last15)
   let chatList = getStorage(`${currentUserId}-chat`)
   console.log('chatList: ', chatList)
-  for (const it of chatList) {
-    for (const it2 of last15) {
-      if (it2.dataset.id === it.nodeId) {
-        let selectable = it2.querySelector('.selectable-text')
-        let transResult = document.createElement('div')
-        transResult.innerHTML = `<h2 class="trasnt">${it.tgt}</h2>`
-        selectable.appendChild(transResult)
+  if (chatList) {
+    for (const it of chatList) {
+      for (const it2 of last15) {
+        if (it2.dataset.id === it.nodeId) {
+          let selectable = it2.querySelector('.selectable-text')
+          let transResult = document.createElement('div')
+          transResult.innerHTML = `<h2 class="trasnt">${it.tgt}</h2>`
+          selectable.appendChild(transResult)
+        }
       }
     }
   }
+
+  let RUGMB = document.querySelector('._26MUt')
+  RUGMB.scrollTo(0, 60000)
 
   observerChat = new MutationObserver((mutationsList, observer) => {
     console.log('mutationsList', mutationsList)
@@ -130,6 +134,9 @@ function sendMessageToBackground(message, node, addedNodes) {
     let transResult = document.createElement('div')
     transResult.innerHTML = `<h2 class="trasnt">${response}</h2>`
     node.appendChild(transResult)
+
+    let RUGMB = document.querySelector('._26MUt')
+    RUGMB.scrollTo(0, 60000)
 
     // 将翻译记录本地存储
     let chatList = getStorage(`${currentUserId}-chat`)
