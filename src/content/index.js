@@ -15,7 +15,7 @@ console.log('content.js')
 // 注入自定义JS
 injectCustomJs()
 // initCustomPanel()
-initCustomPanel2()
+
 initCustomEventListen()
 
 // 接收来自后台的消息
@@ -49,10 +49,67 @@ function initCustomPanel2() {
   document.body.appendChild(panel)
 }
 
-setTimeout(() => {
-  let session = document.querySelector('._3soxC')
-console.log(session);
-}, 5000);
+watchAppRoot()
+
+// 观察初始app加载
+function watchAppRoot() {
+  let count = 0
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'childList' && mutation.addedNodes.length) {
+        count++
+        if (count === 3) {
+          console.log('聊天列表展示')
+          setTimeout(() => {
+            initCustomPanel2()
+            // 停止观察
+            observer.disconnect()
+            // 观察聊天列表
+            watchChatWindows()
+          }, 2000)
+        }
+      }
+    }
+  })
+  observer.observe(document.querySelector('#app'), { attributes: true, childList: true, subtree: false })
+}
+
+// 观察聊天窗口
+function watchChatWindows() {
+  const observer = new MutationObserver((mutationsList, observer) => {
+    console.log(mutationsList)
+    let target = null
+    if (mutationsList.length) {
+      target = mutationsList[mutationsList.length - 1]
+    }
+    console.log(target)
+    setTimeout(watchChatList(), 3000)
+  })
+  observer.observe(document.querySelector('.i5ly3._2l_Ww:last-child'), {
+    attributes: true,
+    childList: true,
+    subtree: false,
+  })
+}
+
+// 观察聊天信息列表
+function watchChatList() {
+  console.log('watchChatList')
+  const observer = new MutationObserver((mutationsList, observer) => {
+    let last = mutationsList[0]
+    let target = last.addedNodes[0].querySelector('.selectable-text')
+    let targetText = target.innerText
+
+    let d = document.createElement('div')
+    d.innerHTML = `<h2 class="trasnt">这是翻译的内容</h2>`
+    target.appendChild(d)
+  })
+  observer.observe(document.querySelector('.tSmQ1'), {
+    attributes: false,
+    childList: true,
+    subtree: false,
+  })
+}
 
 function initCustomEventListen() {
   var hiddenDiv = document.getElementById('myCustomEventDiv')
@@ -68,24 +125,21 @@ function initCustomEventListen() {
     // 收到自定义事件：
     tip(eventData)
 
-    const ls = document.querySelectorAll('._1wlJG')
-
     // 选择需要观察变动的节点
     const targetNode = document.querySelector('.tSmQ1')
-    console.log('开始监听')
     // 观察器的配置（需要观察什么变动）
     const config = { attributes: false, childList: true, subtree: false }
 
     // 当观察到变动时执行的回调函数
     const callback = function (mutationsList, observer) {
       // Use traditional 'for loops' for IE 11
-          let last = mutationsList[0]
-          let target = last.addedNodes[0].querySelector('.selectable-text')
-          let targetText = target.innerText
+      let last = mutationsList[0]
+      let target = last.addedNodes[0].querySelector('.selectable-text')
+      let targetText = target.innerText
 
-         let d =  document.createElement('div')
-          d.innerHTML=`<h2 class="trasnt">这是翻译的内容</h2>`
-          target.appendChild(d)
+      let d = document.createElement('div')
+      d.innerHTML = `<h2 class="trasnt">这是翻译的内容</h2>`
+      target.appendChild(d)
     }
 
     // 创建一个观察器实例并传入回调函数
