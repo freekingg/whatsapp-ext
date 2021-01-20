@@ -57,7 +57,6 @@ export default {
     },
     watchChatWindows() {
       const observer = new MutationObserver(mutationsList => {
-        console.log(mutationsList)
         let target = null
         if (mutationsList.length) {
           target = mutationsList[mutationsList.length - 1]
@@ -91,7 +90,7 @@ export default {
       // 停止观察
       if (this.observerChatInstance) {
         this.observerChatInstance.disconnect()
-        // observerChat = null
+        this.observerChatInstance = null
       }
 
       // 所有消息的父元素容器
@@ -125,10 +124,8 @@ export default {
       }
       // 每次翻译后滚动窗口
       this.scrollToBottom()
-
       this.observerChatInstance = new MutationObserver(mutationsList => {
         const last = mutationsList[mutationsList.length - 1]
-        console.log('observerChatInstance', last)
         if (last) {
           const addedNodes = last.addedNodes[0]
           const selectable = addedNodes.querySelector('.selectable-text')
@@ -157,7 +154,7 @@ export default {
       const input = document.querySelector('.DuUXI ._1awRl')
       const sendBox = document.querySelector('._3qpzV:last-child')
       if (this.sendBoxInstance) {
-        this.observerChatInstance.disconnect()
+        this.sendBoxInstance.disconnect()
       }
 
       this.sendBoxInstance = new MutationObserver(mutationsList => {
@@ -231,7 +228,7 @@ export default {
     sendMessageToBackground(message, node, addedNodes) {
       chrome.runtime.sendMessage({ world: message }, response => {
         // tip('收到来自后台的回复：' + response)
-        console.log(`收到来自后台的回复：${response}`)
+        // console.log(`收到来自后台的回复：${response}`)
         const transResult = document.createElement('div')
         transResult.innerHTML = `<h2 class="trasnt">${response}</h2>`
         node.appendChild(transResult)
