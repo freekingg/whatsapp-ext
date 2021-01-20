@@ -90,7 +90,16 @@
   padding-top: 4px;
 }
 
-._26MUt {
-  /* scroll-behavior: smooth; */
+.chrome-extension-template-content {
+  position: fixed;
+  z-index: 999;
+  top: 160px;
+  left: 50%;
 }
+.chrome-extension-template-content .yi-img{
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+
 

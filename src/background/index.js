@@ -30,8 +30,6 @@ function translate(world) {
     let xhr = new XMLHttpRequest()
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-        console.log('xhr', xhr)
-        console.log('xhr.responseText', xhr.responseText)
         let result = JSON.parse(xhr.responseText)
         resolve(result)
       }

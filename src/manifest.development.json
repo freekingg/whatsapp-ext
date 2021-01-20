@@ -27,5 +27,5 @@
     "scripts": ["hot-reload.js", "js/background.js"]
   },
   "permissions": ["tabs", "activeTab", "contextMenus", "webRequest", "webRequestBlocking", "*://*.whatsapp.com/*"],
-  "web_accessible_resources": ["assets/vue.js", "assets/element-ui.js", "assets/inject.js"]
+  "web_accessible_resources": ["assets/yi.png", "assets/inject.js"]
 }
