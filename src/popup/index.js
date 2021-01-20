@@ -1,8 +1,8 @@
 import Vue from 'vue'
-import { Button, Card } from 'element-ui'
+import { Button } from 'element-ui'
 import App from './App.vue'
 
-Vue.use(Button).use(Card)
+Vue.use(Button)
 
 // eslint-disable-next-line
 new Vue({

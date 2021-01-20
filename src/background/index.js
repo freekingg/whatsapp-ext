@@ -10,9 +10,15 @@ menus.forEach((menu, index) => {
     title: menu,
     contexts: ['selection'],
     onclick: function (info, tab) {
-      chrome.tabs.sendMessage(tab.id, {
-        action: 'action_name',
-        category: menu,
+      translate(info.selectionText).then(result => {
+        if (result && result.errorCode === 0) {
+          let translateResult = result.translateResult
+          chrome.tabs.sendMessage(tab.id, {
+            action: 'translate',
+            origin: info.selectionText,
+            tgt: translateResult[0][0].tgt,
+          })
+        }
       })
     },
   })
@@ -24,6 +30,8 @@ function translate(world) {
     let xhr = new XMLHttpRequest()
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        console.log('xhr', xhr)
+        console.log('xhr.responseText', xhr.responseText)
         let result = JSON.parse(xhr.responseText)
         resolve(result)
       }
@@ -42,6 +50,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (result && result.errorCode === 0) {
       let translateResult = result.translateResult
       sendResponse(translateResult[0][0].tgt)
+    } else {
+      sendResponse('faile')
     }
   })
   return true

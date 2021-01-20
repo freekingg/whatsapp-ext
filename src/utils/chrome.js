@@ -15,6 +15,7 @@ export const executeScriptToCurrentTab = code => {
 // 向页面注入JS
 export const injectCustomJs = path => {
   const jsPath = path || 'assets/inject.js'
+  console.log('jsPath: ', jsPath)
   const temp = document.createElement('script')
   temp.setAttribute('type', 'text/javascript')
   // 获得的地址类似：chrome-extension://ihcokhadfjfchaeagdoclpnjdiokfakg/js/inject.js

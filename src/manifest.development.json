@@ -18,7 +18,7 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "css": ["assets/custom.css"],
+      "css": ["assets/element-ui.css", "assets/custom.css"],
       "js": ["js/content.js"],
       "run_at": "document_end"
     }
@@ -27,6 +27,5 @@
     "scripts": ["hot-reload.js", "js/background.js"]
   },
   "permissions": ["tabs", "activeTab", "contextMenus", "webRequest", "webRequestBlocking", "*://*.whatsapp.com/*"],
-  "host_permissions": ["*://*.youdao.com/*"],
-  "web_accessible_resources": ["assets/inject.js"]
+  "web_accessible_resources": ["assets/vue.js", "assets/element-ui.js", "assets/inject.js"]
 }
