@@ -1,6 +1,10 @@
 <template>
   <div class="chrome-extension-template-content">
     <img :src="imgURL" class="yi-img" />
+    <div class="datouwang">
+      <input type="checkbox" id="dn" v-model="onOff" />
+      <label for="dn" class="toggle"><span class="toggle__handler"></span></label>
+    </div>
   </div>
 </template>
 
@@ -10,14 +14,28 @@ import { setStorage, getStorage, testStr, isArray } from '../utils/help'
 
 export default {
   name: 'app',
+  watch: {
+    onOff(newValue, oldValue) {
+      console.log(newValue)
+      if (this.observerWindowsInstance) {
+        this.observerWindowsInstance.disconnect()
+        this.observerChatInstance.disconnect()
+      }
+      if (newValue) {
+        this.watchChatWindows()
+      }
+    },
+  },
   data() {
     return {
+      onOff: false,
       // 当前用户
       currentUserId: null,
       // 聊天列表监控器实例
       observerChatInstance: null,
       // 聊天发送消息按钮监控器实例
       sendBoxInstance: null,
+      observerWindowsInstance: null,
       // 输入信息是否翻译完成
       done: false,
       imgURL: chrome.extension.getURL('../assets/yi.png'),
@@ -28,13 +46,16 @@ export default {
     // 注入自定义JS
     injectCustomJs()
     // 监控app根dom加载完成后再进行其它相关事件的监听
-    this.watchAppRoot()
+    // this.watchAppRoot()
     // chrome.storage.local.clear()
     chrome.storage.local.get(null, obj => {
       console.log('storage', obj)
     })
   },
   methods: {
+    onOffChange(e) {
+      console.log(e.target.value)
+    },
     // 观察初始app加载
     watchAppRoot() {
       let count = 0
@@ -63,7 +84,7 @@ export default {
       })
     },
     watchChatWindows() {
-      const observer = new MutationObserver(mutationsList => {
+      this.observerWindowsInstance = new MutationObserver(mutationsList => {
         let target = null
         if (mutationsList.length) {
           target = mutationsList[mutationsList.length - 1]
@@ -85,7 +106,7 @@ export default {
           }, 500)
         }
       })
-      observer.observe(document.querySelector('.i5ly3._2l_Ww:last-child'), {
+      this.observerWindowsInstance.observe(document.querySelector('.i5ly3._2l_Ww:last-child'), {
         attributes: true,
         childList: true,
         subtree: false,
@@ -97,7 +118,6 @@ export default {
       // 停止观察
       if (this.observerChatInstance) {
         this.observerChatInstance.disconnect()
-        this.observerChatInstance = null
       }
 
       // 所有消息的父元素容器
@@ -292,4 +312,3 @@ export default {
   },
 }
 </script>
-<style lang="scss"></style>

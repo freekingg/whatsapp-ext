@@ -1,6 +1,5 @@
 // 存储
 export const setStorage = (key, value) => {
-  console.log('value', value)
   // localStorage.setItem(`kk-${key}`, JSON.stringify(value))
   const keys = `kk-${key}`
   chrome.storage.local.set({ [keys]: value }, () => {
@@ -14,7 +13,6 @@ export const getStorage = key =>
   new Promise((resolve, reject) => {
     const keys = `kk-${key}`
     chrome.storage.local.get(keys, result => {
-      console.log(`${keys} get Value currently is`, result[keys])
       if (!result) {
         resolve(false)
       } else {
