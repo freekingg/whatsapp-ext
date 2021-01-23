@@ -6,7 +6,7 @@
 
 <script>
 import { injectCustomJs } from '../utils/chrome'
-import { setStorage, getStorage, testStr } from '../utils/help'
+import { setStorage, getStorage, testStr, isArray } from '../utils/help'
 
 export default {
   name: 'app',
@@ -26,21 +26,24 @@ export default {
 
   mounted() {
     // 注入自定义JS
-
     injectCustomJs()
     // 监控app根dom加载完成后再进行其它相关事件的监听
     this.watchAppRoot()
-
-    const imgURL = chrome.extension.getURL('../assets/yi.png')
+    // chrome.storage.local.clear()
+    chrome.storage.local.get(null, obj => {
+      console.log('storage', obj)
+    })
   },
   methods: {
     // 观察初始app加载
     watchAppRoot() {
       let count = 0
       const observerInstance = new MutationObserver(mutationsList => {
+        console.log('mutationsList', mutationsList)
         for (const mutation of mutationsList) {
           if (mutation.type === 'childList' && mutation.addedNodes.length) {
             count += 1
+            console.log('count', count)
             if (count === 3) {
               console.log('聊天列表展示')
               setTimeout(() => {
@@ -53,7 +56,11 @@ export default {
           }
         }
       })
-      observerInstance.observe(document.querySelector('#app'), { attributes: true, childList: true, subtree: false })
+      observerInstance.observe(document.querySelector('#app'), {
+        attributes: false,
+        childList: true,
+        subtree: false,
+      })
     },
     watchChatWindows() {
       const observer = new MutationObserver(mutationsList => {
@@ -85,7 +92,7 @@ export default {
       })
     },
     // 观察聊天信息列表
-    watchChatList() {
+    async watchChatList() {
       console.log('开始监控消息列表')
       // 停止观察
       if (this.observerChatInstance) {
@@ -108,8 +115,8 @@ export default {
 
       // 获取最近的15条消息
       const last15 = Array.from(tSmQ1.childNodes).slice(-20)
-      const chatListAll = getStorage(`${this.currentUserId}-chat`)
-      if (chatListAll) {
+      const chatListAll = await getStorage(`${this.currentUserId}-chat`)
+      if (isArray(chatListAll) && chatListAll.length) {
         const chatList = chatListAll.slice(-20)
         for (const it of chatList) {
           for (const it2 of last15) {
@@ -226,7 +233,7 @@ export default {
 
     // 主动发送消息给后台&接收结果
     sendMessageToBackground(message, node, addedNodes) {
-      chrome.runtime.sendMessage({ world: message }, response => {
+      chrome.runtime.sendMessage({ world: message }, async response => {
         // tip('收到来自后台的回复：' + response)
         // console.log(`收到来自后台的回复：${response}`)
         const transResult = document.createElement('div')
@@ -237,17 +244,20 @@ export default {
         this.scrollToBottom()
 
         // 将翻译记录本地存储
-        const chatList = getStorage(`${this.currentUserId}-chat`)
+        const chatList = await getStorage(`${this.currentUserId}-chat`)
+        console.log('chatList: ', chatList)
         const tempData = {
           origin: message,
           tgt: response,
           nodeId: addedNodes.dataset.id,
         }
-        if (!chatList) {
+        if (isArray(chatList) && !chatList.length) {
           setStorage(`${this.currentUserId}-chat`, [tempData])
           return
         }
-        setStorage(`${this.currentUserId}-chat`, [...chatList, tempData])
+        // eslint-disable-next-line no-underscore-dangle
+        const _chatList = isArray(chatList) ? chatList : []
+        setStorage(`${this.currentUserId}-chat`, [..._chatList, tempData])
       })
     },
 

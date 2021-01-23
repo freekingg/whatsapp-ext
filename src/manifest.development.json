@@ -26,6 +26,15 @@
   "background": {
     "scripts": ["hot-reload.js", "js/background.js"]
   },
-  "permissions": ["tabs", "activeTab", "contextMenus", "webRequest", "webRequestBlocking", "*://*.whatsapp.com/*"],
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "contextMenus",
+    "webRequest",
+    "webRequestBlocking",
+    "storage",
+    "*://*.whatsapp.com/*"
+  ],
+  "host_permissions": ["*://*.youdao.com/*"],
   "web_accessible_resources": ["assets/yi.png", "assets/inject.js"]
 }
