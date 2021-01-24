@@ -2,9 +2,7 @@
 export const setStorage = (key, value) => {
   // localStorage.setItem(`kk-${key}`, JSON.stringify(value))
   const keys = `kk-${key}`
-  chrome.storage.local.set({ [keys]: value }, () => {
-    console.log(`Value is set to ${keys}`, value)
-  })
+  chrome.storage.local.set({ [keys]: value }, () => {})
 }
 
 // 获取存储

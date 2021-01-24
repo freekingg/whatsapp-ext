@@ -10,6 +10,7 @@ module.exports = {
     'no-restricted-syntax': 0,
     'no-unused-vars': 0,
     'consistent-return': 0,
+    'no-unused-expressions': 0,
   },
   parserOptions: {
     parser: 'babel-eslint',

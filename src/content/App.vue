@@ -1,5 +1,5 @@
 <template>
-  <div class="chrome-extension-template-content">
+  <div class="chrome-extension-template-content" v-if="show">
     <img :src="imgURL" class="yi-img" />
     <div class="datouwang">
       <input type="checkbox" id="dn" v-model="onOff" />
@@ -16,18 +16,19 @@ export default {
   name: 'app',
   watch: {
     onOff(newValue, oldValue) {
-      console.log(newValue)
-      if (this.observerWindowsInstance) {
-        this.observerWindowsInstance.disconnect()
-        this.observerChatInstance.disconnect()
-      }
-      if (newValue) {
-        this.watchChatWindows()
+      const main = document.querySelector('#main')
+      if (!this.observerWindowsInstance) {
+        if (main) {
+          this.watchChatWindows(true)
+        } else {
+          this.watchChatWindows()
+        }
       }
     },
   },
   data() {
     return {
+      show: false,
       onOff: false,
       // 当前用户
       currentUserId: null,
@@ -46,11 +47,11 @@ export default {
     // 注入自定义JS
     injectCustomJs()
     // 监控app根dom加载完成后再进行其它相关事件的监听
-    // this.watchAppRoot()
+    this.watchAppRoot()
     // chrome.storage.local.clear()
-    chrome.storage.local.get(null, obj => {
-      console.log('storage', obj)
-    })
+    // chrome.storage.local.get(null, obj => {
+    //   console.log('storage', obj)
+    // })
   },
   methods: {
     onOffChange(e) {
@@ -58,21 +59,15 @@ export default {
     },
     // 观察初始app加载
     watchAppRoot() {
-      let count = 0
       const observerInstance = new MutationObserver(mutationsList => {
-        console.log('mutationsList', mutationsList)
         for (const mutation of mutationsList) {
           if (mutation.type === 'childList' && mutation.addedNodes.length) {
-            count += 1
-            console.log('count', count)
-            if (count === 3) {
-              console.log('聊天列表展示')
+            if (mutation.addedNodes[0].className === '_36Q2N two') {
+              console.log('加载完了')
               setTimeout(() => {
-                // 停止观察
-                observerInstance.disconnect()
-                // 观察聊天列表
-                this.watchChatWindows()
-              }, 1000)
+                this.show = true
+              }, 500)
+              observerInstance.disconnect()
             }
           }
         }
@@ -80,12 +75,15 @@ export default {
       observerInstance.observe(document.querySelector('#app'), {
         attributes: false,
         childList: true,
-        subtree: false,
+        subtree: true,
       })
     },
-    watchChatWindows() {
+    // trigger 代表是否需要手动触发一次dom更新
+    watchChatWindows(trigger) {
+      const mainBox = document.querySelector('.i5ly3._2l_Ww:last-child')
       this.observerWindowsInstance = new MutationObserver(mutationsList => {
         let target = null
+        console.log(mutationsList)
         if (mutationsList.length) {
           target = mutationsList[mutationsList.length - 1]
           let current = {}
@@ -106,11 +104,14 @@ export default {
           }, 500)
         }
       })
-      this.observerWindowsInstance.observe(document.querySelector('.i5ly3._2l_Ww:last-child'), {
+      this.observerWindowsInstance.observe(mainBox, {
         attributes: true,
         childList: true,
         subtree: false,
       })
+      if (trigger) {
+        mainBox.style.background = 'red'
+      }
     },
     // 观察聊天信息列表
     async watchChatList() {
@@ -118,6 +119,7 @@ export default {
       // 停止观察
       if (this.observerChatInstance) {
         this.observerChatInstance.disconnect()
+        this.observerChatInstance = null
       }
 
       // 所有消息的父元素容器
@@ -129,6 +131,10 @@ export default {
 
       // 切换了聊天用户
       console.log('%c 切换了聊天用户', 'color: #4fc3f7')
+
+      if (!this.onOff) {
+        console.log('翻译开关已经关闭，返回')
+      }
 
       // 每次切换聊天窗口后，将之前监听事件清除
       input.removeEventListener('keydown', this.sendEnterHandle)
@@ -182,6 +188,7 @@ export default {
       const sendBox = document.querySelector('._3qpzV:last-child')
       if (this.sendBoxInstance) {
         this.sendBoxInstance.disconnect()
+        this.sendBoxInstance = null
       }
 
       this.sendBoxInstance = new MutationObserver(mutationsList => {
@@ -209,6 +216,8 @@ export default {
 
     // 点击回车后拦截的处理方法
     sendEnterHandle(e) {
+      if (!this.onOff) return
+
       const DuUXI = document.querySelector('.DuUXI')
       const input = DuUXI.querySelector('._1awRl')
 
@@ -231,6 +240,7 @@ export default {
     },
     // 点击发送按钮后拦截的处理方法
     sendBtnHandle(e) {
+      if (!this.onOff) return
       const DuUXI = document.querySelector('.DuUXI')
       const input = DuUXI.querySelector('._1awRl')
 
@@ -265,7 +275,6 @@ export default {
 
         // 将翻译记录本地存储
         const chatList = await getStorage(`${this.currentUserId}-chat`)
-        console.log('chatList: ', chatList)
         const tempData = {
           origin: message,
           tgt: response,
@@ -283,6 +292,7 @@ export default {
 
     // 主动发送消息给后台&接收结果
     sendMessageToBackgroundTranslate(message, nodes) {
+      if (!this.onOff) return
       chrome.runtime.sendMessage({ world: message }, response => {
         // tip('收到来自后台的回复：' + response)
         // console.log(`收到来自后台的回复：${response}`)

@@ -93,7 +93,7 @@
 .chrome-extension-template-content {
   position: fixed;
   z-index: 999;
-  top: 160px;
+  top: 120px;
   left: 50%;
 }
 .chrome-extension-template-content .yi-img{
