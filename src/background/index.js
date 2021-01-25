@@ -25,7 +25,7 @@ menus.forEach((menu, index) => {
 })
 
 // 翻译
-function translate(world) {
+function translate(world, sourceLangue = 'JA') {
   return new Promise((resolve, reject) => {
     let xhr = new XMLHttpRequest()
     xhr.onreadystatechange = function () {
@@ -34,7 +34,7 @@ function translate(world) {
         resolve(result)
       }
     }
-    xhr.open('GET', `http://fanyi.youdao.com/translate?&doctype=json&type=AUTO&i=${world}`, true)
+    xhr.open('GET', `http://fanyi.youdao.com/translate?&doctype=json&type=${sourceLangue}2EN&i=${world}`, true)
     xhr.send()
   })
 }

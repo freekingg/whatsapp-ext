@@ -1,9 +1,18 @@
 <template>
   <div class="chrome-extension-template-content" v-if="show">
-    <img :src="imgURL" class="yi-img" />
-    <div class="datouwang">
-      <input type="checkbox" id="dn" v-model="onOff" />
-      <label for="dn" class="toggle"><span class="toggle__handler"></span></label>
+    <div class="fix-box">
+      <div class="datouwang">
+        <input type="checkbox" id="dn" v-model="onOff" />
+        <label for="dn" class="toggle"><span class="toggle__handler"></span></label>
+      </div>
+      <div class="select">
+        <select name="slct" id="slct">
+          <option selected>中文</option>
+          <option value="1">越南语</option>
+          <option value="2">印度尼西亚语</option>
+          <option value="3">阿拉伯语</option>
+        </select>
+      </div>
     </div>
   </div>
 </template>
