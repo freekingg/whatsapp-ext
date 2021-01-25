@@ -229,7 +229,7 @@ export default {
           this.done = false
           return true
         }
-        if (!testStr(innerText, '正在翻译中...')) {
+        if (!testStr(innerText, '正在翻译中...') && innerText.trim()) {
           input.innerHTML = `(${innerText})  正在翻译中...`
           // 发送消息向background进行翻译
           window.postMessage({ cmd: 'invoke', code: this.sendMessageToBackgroundTranslate(innerText, input) }, '*')
